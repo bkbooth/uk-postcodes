@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+    <title>UK Postcodes</title>
+
+    <link rel="stylesheet" href="leaflet/leaflet.css">
+    <link rel="stylesheet" href="leaflet/leaflet.label.css">
+    <style>
+        body{
+            margin: 0;
+            padding: 0;
+        }
+        html, body, #map {
+            height: 100%;
+        }
+        .control {
+            padding: 6px 8px;
+            font: 14px/16px Arial, Helvetica, sans-serif;
+            background: white;
+            background: rgba(255,255,255,0.8);
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            border-radius: 5px;
+        }
+        .control h4 {
+            margin: 0 0 5px;
+            color: #777;
+        }
+        .control.loader span {
+            float: right;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+
+    <script src="jquery/jquery-2.1.1.min.js"></script>
+    <script src="leaflet/leaflet.js"></script>
+    <script src="leaflet/leaflet.label.js"></script>
+    <script>
+        var mapBoxId = 'your.mapbox.id',
+            map = L.map('map').setView([53.21919, -1.86768], 7),
+            loading = L.control({position: 'bottomright'}),
+            fileAreas = 'data/Areas.geojson',
+            fileDistricts = 'data/Districts.geojson',
+            fileSectors = 'data/Sectors.geojson',
+            style = {
+                weight: 2,
+                opacity: 1,
+                color: 'white',
+                fillOpacity: 0.3
+            },
+            geoJsonLayerOptions = {
+                style: style,
+                onEachFeature: onEachFeature
+            },
+            layerAreas = L.geoJson(null, geoJsonLayerOptions),
+            layerDistricts = L.geoJson(null, geoJsonLayerOptions),
+            layerSectors = L.geoJson(null, geoJsonLayerOptions),
+            overlayMaps = {
+                "Areas": layerAreas,
+                "Districts": layerDistricts,
+                "Sectors": layerSectors
+            };
+
+        function onEachFeature(feature, layer) {
+            layer.setStyle({fillColor: randomColor()});
+            layer.bindLabel(feature.properties.name, {noHide: true});
+        }
+
+        function randomRange(min, max) {
+            return Math.floor(Math.random() * (max - min)) + min;
+        }
+
+        function randomColor() {
+            return 'rgb('+randomRange(0, 256)+','+randomRange(0, 256)+','+randomRange(0, 256)+')';
+        }
+
+        L.tileLayer('http://{s}.tiles.mapbox.com/v3/{id}/{z}/{x}/{y}.png', {
+            id: mapBoxId,
+            maxZoom: 18,
+            attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>'
+        }).addTo(map);
+
+        L.control.layers(null, overlayMaps, {collapsed: false}).addTo(map);
+
+        loading.onAdd = function(map) {
+            var div = L.DomUtil.create('div', 'control loader');
+
+            div.innerHTML = "\
+            <h4>Loading GeoJSON</h4>\
+            <div>\
+                Areas... <span id=\"loadAreas\">&#x21BB;</span><br>\
+                Districts... <span id=\"loadDistricts\">&#x21BB;</span><br>\
+                Sectors... <span id=\"loadSectors\">&#x21BB;</span>\
+            </div>\
+            ";
+
+            return div;
+        };
+
+        loading.addTo(map);
+
+        $.getJSON(fileAreas, function(data) {
+            layerAreas.addData(data.features);
+
+            $('#loadAreas').html('&#x2713;');
+        }).error(function(error) {
+            console.error("Failed loading '"+fileAreas+"'", "Error: "+error.statusText);
+
+            $('#loadAreas').html('&#x2717;');
+        });
+
+        $.getJSON(fileDistricts, function(data) {
+            layerDistricts.addData(data.features);
+
+            $('#loadDistricts').html('&#x2713;');
+        }).error(function(error) {
+            console.error("Failed loading '"+fileDistricts+"'", "Error: "+error.statusText);
+
+            $('#loadDistricts').html('&#x2717;');
+        });
+
+        $.getJSON(fileSectors, function(data) {
+            layerSectors.addData(data.features);
+
+            $('#loadSectors').html('&#x2713;');
+        }).error(function(error) {
+            console.error("Failed loading '"+fileSectors+"'", "Error: "+error.statusText);
+
+            $('#loadSectors').html('&#x2717;');
+        });
+    </script>
+</body>
+</html>
