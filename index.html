@@ -41,21 +41,42 @@
     <script src="leaflet/leaflet.label.js"></script>
     <script src="config.js"></script>
     <script>
-        var map = L.map('map').setView([53.21919, -1.86768], 7),
-            loading = L.control({position: 'bottomright'}),
-            geoJsonLayerOptions = {
+        var loading = L.control({position: 'bottomright'}),         // GeoJSON loading indicator in bottom-right
+            geoJsonLayerOptions = {                                 // Default options for each GeoJSON layer
                 style: config.shapeStyle,
                 onEachFeature: onEachFeature
             },
-            layerAreas = L.geoJson(null, geoJsonLayerOptions),
-            layerDistricts = L.geoJson(null, geoJsonLayerOptions),
-            layerSectors = L.geoJson(null, geoJsonLayerOptions),
-            overlayMaps = {
+            layerAreas = L.geoJson(null, geoJsonLayerOptions),      // Postcode areas GeoJSON layer
+            layerDistricts = L.geoJson(null, geoJsonLayerOptions),  // Postcode districts GeoJSON layer
+            layerSectors = L.geoJson(null, geoJsonLayerOptions),    // Postcode sectors GeoJSON layer
+            layerMapbox = L.tileLayer(config.mapbox.url, {          // Mapbox tile layer
+                id: config.mapbox.id,
+                attribution: config.mapbox.attribution,
+                maxZoom: 15
+            }),
+            layerOSM = L.tileLayer(config.openStreetMap.url, {      // OpenStreetMap tile layer (default)
+                attribution: config.openStreetMap.attribution,
+                maxZoom: 15
+            }),
+            tileMaps = {                                            // Tile map layer switcher
+                "Mapbox": layerMapbox,
+                "OpenStreetMap": layerOSM
+            },
+            overlayMaps = {                                         // GeoJSON layer switcher
                 "Areas": layerAreas,
                 "Districts": layerDistricts,
                 "Sectors": layerSectors
-            };
+            },
+            map = L.map('map', {                                    // Setup map object
+                center: [53.21919, -1.86768],
+                zoom: 7,
+                layers: [layerOSM]
+            });
 
+        // Add layers control
+        L.control.layers(tileMaps, overlayMaps, {collapsed: false}).addTo(map);
+
+        // For each feature, set random fill colour and bind 'name' label
         function onEachFeature(feature, layer) {
             layer.setStyle({fillColor: randomColor()});
             layer.bindLabel(feature.properties.name, {noHide: true});
@@ -69,14 +90,7 @@
             return 'rgb('+randomRange(0, 256)+','+randomRange(0, 256)+','+randomRange(0, 256)+')';
         }
 
-        L.tileLayer(config.mapBox.url, {
-            id: config.mapBox.id,
-            attribution: config.mapBox.attribution,
-            maxZoom: 18
-        }).addTo(map);
-
-        L.control.layers(null, overlayMaps, {collapsed: false}).addTo(map);
-
+        // Setup GeoJSON loading indicator and add to map
         loading.onAdd = function() {
             var div = L.DomUtil.create('div', 'control loader');
 
@@ -91,10 +105,11 @@
 
             return div;
         };
-
         loading.addTo(map);
 
+        // Load postcode Areas GeoJSON file
         $.getJSON(config.fileAreas, function(data) {
+            // Add loaded GeoJSON data to layer
             layerAreas.addData(data.features);
 
             $('#loadAreas').html('&#x2713;');
@@ -104,7 +119,9 @@
             $('#loadAreas').html('&#x2717;');
         });
 
+        // Load postcode Districts GeoJSON file
         $.getJSON(config.fileDistricts, function(data) {
+            // Add loaded GeoJSON data to layer
             layerDistricts.addData(data.features);
 
             $('#loadDistricts').html('&#x2713;');
@@ -114,7 +131,9 @@
             $('#loadDistricts').html('&#x2717;');
         });
 
+        // Load postcode Sectors GeoJSON file
         $.getJSON(config.fileSectors, function(data) {
+            // Add loaded GeoJSON data to layer
             layerSectors.addData(data.features);
 
             $('#loadSectors').html('&#x2713;');
