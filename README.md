@@ -2,6 +2,14 @@
 
 ShapeFile to GeoJSON converter and Leaflet.js viewer.
 
+### Install prerequisites
+
+- Node.js (http://nodejs.org/)
+- GDAL/ogr2ogr (http://www.gdal.org/ogr2ogr.html)
+- Static web server
+  - Python3 (https://www.python.org/)
+  - node-static (https://www.npmjs.org/package/node-static)
+
 ### Initialise GeoJSON Files
 
 ```
