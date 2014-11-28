@@ -136,7 +136,7 @@
         });
 
         // Load postcode Areas GeoJSON file
-        $.getJSON(config.fileAreas, function(data) {
+        $.getJSON(config.files.areas, function(data) {
             // Add loaded GeoJSON data to layer
             layerAreas.addData(data.features);
 
@@ -146,33 +146,33 @@
             loaded.areas = true;
             $('#loadAreas').html('&#x2713;');
         }).error(function(error) {
-            console.error("Failed loading '"+config.fileAreas+"'", "Error: "+error.statusText);
+            console.error("Failed loading '"+config.files.areas+"'", "Error: "+error.statusText);
 
             $('#loadAreas').html('&#x2717;');
         });
 
         // Load postcode Districts GeoJSON file
-        $.getJSON(config.fileDistricts, function(data) {
+        $.getJSON(config.files.districts, function(data) {
             // Add loaded GeoJSON data to layer
             layerDistricts.addData(data.features);
 
             loaded.districts = true;
             $('#loadDistricts').html('&#x2713;');
         }).error(function(error) {
-            console.error("Failed loading '"+config.fileDistricts+"'", "Error: "+error.statusText);
+            console.error("Failed loading '"+config.files.districts+"'", "Error: "+error.statusText);
 
             $('#loadDistricts').html('&#x2717;');
         });
 
         // Load postcode Sectors GeoJSON file
-        $.getJSON(config.fileSectors, function(data) {
+        $.getJSON(config.files.sectors, function(data) {
             // Add loaded GeoJSON data to layer
             layerSectors.addData(data.features);
 
             loaded.sectors = true;
             $('#loadSectors').html('&#x2713;');
         }).error(function(error) {
-            console.error("Failed loading '"+config.fileSectors+"'", "Error: "+error.statusText);
+            console.error("Failed loading '"+config.files.sectors+"'", "Error: "+error.statusText);
 
             $('#loadSectors').html('&#x2717;');
         });

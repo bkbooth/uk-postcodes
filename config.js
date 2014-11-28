@@ -8,9 +8,11 @@ var config = {
         id: 'your.mapbox.id',
         attribution: "<a href='https://www.mapbox.com/about/maps/' target='_blank'>&copy; Mapbox &copy; OpenStreetMap</a> <a class='mapbox-improve-map' href='https://www.mapbox.com/map-feedback/' target='_blank'>Improve this map</a>"
     },
-    fileAreas: 'data/Areas.geojson',
-    fileDistricts: 'data/Districts.geojson',
-    fileSectors: 'data/Sectors.geojson',
+    files: {
+        areas: 'data/Areas.geojson',
+        districts: 'data/Districts.geojson',
+        sectors: 'data/Sectors.geojson'
+    },
     shapeStyle: {
         weight: 2,
         opacity: 1,
