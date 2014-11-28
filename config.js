@@ -16,5 +16,11 @@ var config = {
         opacity: 1,
         color: 'white',
         fillOpacity: 0.3
+    },
+    zoom: {
+        areas: 4,
+        districts: 11,
+        sectors: 15,
+        max: 16
     }
 };

@@ -42,6 +42,11 @@
     <script src="config.js"></script>
     <script>
         var loading = L.control({position: 'bottomright'}),         // GeoJSON loading indicator in bottom-right
+            loaded = {                                              // GeoJSON loain status
+                areas: false,
+                districts: false,
+                sectors: false
+            },
             geoJsonLayerOptions = {                                 // Default options for each GeoJSON layer
                 style: config.shapeStyle,
                 onEachFeature: onEachFeature
@@ -52,11 +57,11 @@
             layerMapbox = L.tileLayer(config.mapbox.url, {          // Mapbox tile layer
                 id: config.mapbox.id,
                 attribution: config.mapbox.attribution,
-                maxZoom: 15
+                maxZoom: config.zoom.max
             }),
             layerOSM = L.tileLayer(config.openStreetMap.url, {      // OpenStreetMap tile layer (default)
                 attribution: config.openStreetMap.attribution,
-                maxZoom: 15
+                maxZoom: config.zoom.max
             }),
             tileMaps = {                                            // Tile map layer switcher
                 "Mapbox": layerMapbox,
@@ -107,11 +112,38 @@
         };
         loading.addTo(map);
 
+        // Automatically set the GeoJSON layer depending on zoom level
+        map.on('zoomend', function() {
+            if (!(loaded.areas && loaded.districts && loaded.sectors)) {
+                return;
+            }
+
+            var zoom = map.getZoom();
+
+            if (zoom >= config.zoom.areas && zoom < config.zoom.districts && !map.hasLayer(layerAreas)) {
+                map.removeLayer(layerDistricts);
+                map.removeLayer(layerSectors);
+                map.addLayer(layerAreas);
+            } else if(zoom >= config.zoom.districts && zoom < config.zoom.sectors && !map.hasLayer(layerDistricts)) {
+                map.removeLayer(layerAreas);
+                map.removeLayer(layerSectors);
+                map.addLayer(layerDistricts);
+            } else if(zoom >= config.zoom.sectors && !map.hasLayer(layerSectors)) {
+                map.removeLayer(layerAreas);
+                map.removeLayer(layerDistricts);
+                map.addLayer(layerSectors);
+            }
+        });
+
         // Load postcode Areas GeoJSON file
         $.getJSON(config.fileAreas, function(data) {
             // Add loaded GeoJSON data to layer
             layerAreas.addData(data.features);
 
+            // Show Areas layer by default
+            map.addLayer(layerAreas);
+
+            loaded.areas = true;
             $('#loadAreas').html('&#x2713;');
         }).error(function(error) {
             console.error("Failed loading '"+config.fileAreas+"'", "Error: "+error.statusText);
@@ -124,6 +156,7 @@
             // Add loaded GeoJSON data to layer
             layerDistricts.addData(data.features);
 
+            loaded.districts = true;
             $('#loadDistricts').html('&#x2713;');
         }).error(function(error) {
             console.error("Failed loading '"+config.fileDistricts+"'", "Error: "+error.statusText);
@@ -136,6 +169,7 @@
             // Add loaded GeoJSON data to layer
             layerSectors.addData(data.features);
 
+            loaded.sectors = true;
             $('#loadSectors').html('&#x2713;');
         }).error(function(error) {
             console.error("Failed loading '"+config.fileSectors+"'", "Error: "+error.statusText);
